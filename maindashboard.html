@@ -27,6 +27,11 @@
             background-color: #007bff;
             color: white;
         }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -36,6 +41,7 @@
             <div class="header-buttons">
                 <button class="btn btn-dark" id="todayBtn">Today</button>
                 <button class="btn btn-dark" id="monthlyBtn">Monthly</button>
+                
             </div>
         </div>
 
@@ -71,6 +77,7 @@
                     </div>
                 </div>
             </div>
+            <button class="btn btn-danger" id="clearDataBtn">Clear All Data</button>
         </div>
 
         <div class="card call-details-card" id="callDetailsCard" style="display: none;">
@@ -96,7 +103,6 @@
             </div>
             <div class="card-footer">
                 <div class="button-container">
-                    <button id="clearDataBtn" class="btn btn-danger action-btn">Clear</button>
                     <button id="printBtn" class="btn btn-primary action-btn">Print</button>
                 </div>
             </div>
@@ -193,15 +199,55 @@
             if (callbackCard) callbackCard.addEventListener('click', () => showCallDetails('Callback'));
             if (interestedCard) interestedCard.addEventListener('click', () => showCallDetails('Interested'));
 
-            // Add event listener for the monthly button
-            const monthlyBtn = document.getElementById('monthlyBtn');
-            if (monthlyBtn) {
-                monthlyBtn.addEventListener('click', function() {
-                    window.open('monthly_calls.html', '_blank');
+            // Add event listeners for Clear and Print buttons
+            const clearDataBtn = document.getElementById('clearDataBtn');
+            const printBtn = document.getElementById('printBtn');
+
+            if (clearDataBtn) {
+                clearDataBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to clear ALL data from the database? This action cannot be undone.')) {
+                        // Initialize Firebase (make sure this is done earlier in your code)
+                        // const firebaseConfig = { ... };
+                        // firebase.initializeApp(firebaseConfig);
+
+                        // Get a reference to the database
+                        const database = firebase.database();
+
+                        // Clear all data from Firebase
+                        database.ref().remove()
+                            .then(() => {
+                                console.log('All data has been cleared from the database.');
+                                // alert('All data has been cleared from the database.');
+                                // Refresh the page or update the UI as needed
+                                location.reload();
+                            })
+                            .catch((error) => {
+                                console.error('Error clearing data:', error);
+                                alert('An error occurred while clearing data. Please try again.');
+                            });
+                    } else {
+                        console.log('Clear data operation cancelled.');
+                    }
                 });
             }
 
-            // ... other event listeners and initializations
+            if (printBtn) {
+                printBtn.addEventListener('click', function() {
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write('<html><head><title>Call Details</title>');
+                    printWindow.document.write('<style>');
+                    printWindow.document.write('table { border-collapse: collapse; width: 100%; }');
+                    printWindow.document.write('th, td { border: 1px solid black; padding: 8px; text-align: left; }');
+                    printWindow.document.write('th { background-color: #f2f2f2; }');
+                    printWindow.document.write('</style>');
+                    printWindow.document.write('</head><body>');
+                    printWindow.document.write('<h1>Call Details</h1>');
+                    printWindow.document.write(document.querySelector('.call-details-table').outerHTML);
+                    printWindow.document.write('</body></html>');
+                    printWindow.document.close();
+                    printWindow.print();
+                });
+            }
         });
     </script>
 </body>
